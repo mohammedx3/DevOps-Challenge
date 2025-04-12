@@ -1,1 +1,8 @@
 .vscode/*
+.pytest_cache
+
+# Common Helm/Kubernetes files to ignore
+charts/*.tgz
+tests/__snapshot__/
+.helm/
+*.tgz

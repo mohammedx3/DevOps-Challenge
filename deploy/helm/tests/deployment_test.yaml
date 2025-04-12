@@ -1,0 +1,33 @@
+suite: Deployment Tests
+templates:
+  - deployment.yaml
+tests:
+  - it: should render with correct replica count
+    values:
+      - ../values-prod.yaml
+    set:
+      replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should render security context correctly
+    values:
+      - ../values-prod.yaml
+    set:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        capabilities:
+          drop:
+          - ALL
+        readOnlyRootFilesystem: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1000

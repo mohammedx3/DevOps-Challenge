@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  labels:
+    {{- include "tornado-app.labels" . | nindent 4 }}
+data:
+  ENVIRONMENT: {{ .Values.environment.ENVIRONMENT | quote }}
+  HOST: {{ .Values.environment.HOST | quote }}
+  PORT: {{ .Values.environment.PORT | quote }}
+  REDIS_DB: {{ .Values.environment.REDIS_DB | quote }}
+  REDIS_HOST: {{ .Release.Name }}-redis-master
+  REDIS_PORT: "6379"

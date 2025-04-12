@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        description: "Docker image tag to deploy"
+        required: true
+        type: string
+      env_file:
+        description: "Environment values file to use"
+        required: true
+        type: string
+      environment:
+        description: "GitHub environment to deploy to"
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Start Minikube
+      uses: medyagh/setup-minikube@master
+      with:
+        minikube-version: 1.28.0
+        kubernetes-version: v1.25.3
+        driver: docker
+        start-args: --memory=2200mb --cpus=2
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'v3.10.0'
+
+    - name: Deploy with Helm
+      run: |
+        helm dependency update ./deploy/helm
+        
+        helm install tornado-app ./deploy/helm \
+          -f ./deploy/helm/values.yaml \
+          -f ./deploy/helm/${{ inputs.env_file }} \
+          --set image.tag=${{ inputs.image_tag }}
+          
+        kubectl wait --for=condition=available --timeout=300s deployment/tornado-app
+        
+        echo "Deployment status:"
+        kubectl get pods
+        echo "Image: $(kubectl get deployment tornado-app -o jsonpath='{.spec.template.spec.containers[0].image}')"
+        kubectl get svc
+
+    - name: Test application
+      run: |
+        kubectl port-forward svc/tornado-app 8080:80 &
+        PID=$!
+        echo "Waiting for port forwarding to establish..."
+        sleep 5
+        curl -v http://localhost:8080/
+        kill $PID || true

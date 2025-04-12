@@ -1,0 +1,51 @@
+environment:
+  ENVIRONMENT: "DEV"
+
+image:
+  repository: mohammedx3/tornado-app
+  pullPolicy: IfNotPresent
+  tag: "dev"
+
+# Lighter Redis setup for development
+redis:
+  architecture: standalone
+  master:
+    persistence:
+      size: 1Gi
+
+# Lower resource allocations for development
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# HPA
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+# Deployment strategy
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 50%
+    maxUnavailable: 50%
+
+# PDB
+pdb:
+  enabled: true
+  maxUnavailable: "50%"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: dev.tornado-app.example.com
+      paths:
+        - path: /
+          pathType: Prefix

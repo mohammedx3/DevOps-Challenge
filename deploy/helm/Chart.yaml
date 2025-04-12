@@ -1,0 +1,11 @@
+apiVersion: v2
+name: tornado-app
+description: A Tornado web application with Redis counter
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+dependencies:
+  - name: redis
+    version: ~20.0.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled

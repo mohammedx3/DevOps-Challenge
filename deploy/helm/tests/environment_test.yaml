@@ -1,0 +1,35 @@
+suite: Environment Tests
+templates:
+  - configmap.yaml
+tests:
+  - it: should set DEV environment in dev values
+    values:
+      - ../values-dev.yaml
+    asserts:
+      - equal:
+          path: data.ENVIRONMENT
+          value: "DEV"
+      - equal:
+          path: data.PORT
+          value: "8000"
+      - equal:
+          path: data.REDIS_DB
+          value: "0"
+      - isKind:
+          of: ConfigMap
+
+  - it: should set PROD environment in prod values
+    values:
+      - ../values-prod.yaml
+    asserts:
+      - equal:
+          path: data.ENVIRONMENT
+          value: "PROD"
+      - equal:
+          path: data.PORT
+          value: "8000"
+      - equal:
+          path: data.REDIS_DB
+          value: "0"
+      - isKind:
+          of: ConfigMap

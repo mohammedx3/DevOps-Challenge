@@ -1,0 +1,29 @@
+suite: Service Tests
+templates:
+  - service.yaml
+tests:
+  - it: should set correct service port
+    values:
+      - ../values-prod.yaml
+    set:
+      service:
+        port: 80
+        targetPort: 8000
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 80
+      - equal:
+          path: spec.ports[0].targetPort
+          value: 8000
+
+  - it: should set correct service type
+    values:
+      - ../values-prod.yaml
+    set:
+      service:
+        type: ClusterIP
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP

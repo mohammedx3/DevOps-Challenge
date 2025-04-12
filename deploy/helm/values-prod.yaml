@@ -1,0 +1,53 @@
+environment:
+  ENVIRONMENT: "PROD"
+  
+image:
+  repository: mohammedx3/tornado-app
+  pullPolicy: IfNotPresent
+  tag: "prod"
+
+# Production-optimized Redis
+redis:
+  architecture: replication
+  replica:
+    replicaCount: 2
+  master:
+    persistence:
+      size: 10Gi
+
+# Higher resource allocations for production
+resources:
+  limits:
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Deployment strategy
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 1
+
+# PDB
+pdb:
+  enabled: true
+  maxUnavailable: 1
+
+# HPA
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: prod.tornado-app.example.com
+      paths:
+        - path: /
+          pathType: Prefix

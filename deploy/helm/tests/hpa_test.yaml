@@ -1,0 +1,49 @@
+suite: HorizontalPodAutoscaler Tests
+templates:
+  - hpa.yaml
+tests:
+  - it: should use dev-specific autoscaling settings
+    values:
+      - ../values-dev.yaml
+    asserts:
+      - equal:
+          path: spec.minReplicas
+          value: 3
+      - equal:
+          path: spec.maxReplicas
+          value: 5
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 80
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - hasDocuments:
+          count: 1
+
+  - it: should use production-specific autoscaling settings with memory metric
+    values:
+      - ../values-prod.yaml
+    asserts:
+      - equal:
+          path: spec.minReplicas
+          value: 3
+      - equal:
+          path: spec.maxReplicas
+          value: 10
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 80
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - hasDocuments:
+          count: 1
+
+  - it: should disable autoscaling when set to disabled
+    values:
+      - ../values-prod.yaml
+    set:
+      autoscaling:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

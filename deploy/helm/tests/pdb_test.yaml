@@ -1,0 +1,37 @@
+suite: PodDisruptionBudget Tests
+templates:
+  - pdb.yaml
+tests:
+  - it: should not create a PDB when disabled
+    values:
+      - ../values-prod.yaml
+    set:
+      pdb:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should use dev-specific PDB settings
+    values:
+      - ../values-dev.yaml
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: "50%"
+      - hasDocuments:
+          count: 1
+
+  - it: should use prod-specific PDB settings
+    values:
+      - ../values-prod.yaml
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - hasDocuments:
+          count: 1

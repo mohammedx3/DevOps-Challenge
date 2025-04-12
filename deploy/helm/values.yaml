@@ -1,0 +1,63 @@
+# Default values for tornado-app
+replicaCount: 3
+
+serviceAccount:
+  create: true
+  annotations: {}
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+environment:
+  PORT: "8000"
+  HOST: "tornado-app"
+  REDIS_DB: "0"
+
+# Redis configuration
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    # Password will be auto-generated if not provided
+    password: ""
+    usePasswordFiles: true
+  architecture: standalone
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+  # Improve security with securityContext
+  securityContext:
+    enabled: true
+    fsGroup: 1001
+    runAsUser: 1001
+
+# Security configurations
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+
+podSecurityContext:
+  fsGroup: 1000
+
+# Probes for container health checks
+probes:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    path: /health
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    path: /ready
